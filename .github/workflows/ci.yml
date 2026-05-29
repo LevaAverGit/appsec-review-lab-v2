@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+      - name: Run tests
+        run: pytest -v --tb=short
+      - name: Lint (non-blocking)
+        run: ruff check app tests || true
+      - name: Install advisory security tools
+        run: pip install bandit semgrep
+      - name: Bandit SAST scan (advisory — intentionally vulnerable code)
+        run: |
+          echo "NOTE: Bandit findings are expected — this repo intentionally contains"
+          echo "vulnerable code examples in app/api/routes_vulnerable.py for educational purposes."
+          bandit -r app -ll --exclude app/api/routes_vulnerable.py || true
+          echo "--- Informational scan of vulnerable routes (expected findings) ---"
+          bandit -r app/api/routes_vulnerable.py -ll || true
+      - name: Semgrep advisory scan (advisory — intentionally vulnerable code)
+        run: |
+          echo "NOTE: Semgrep findings in routes_vulnerable.py are expected by design."
+          semgrep --config p/python --config p/owasp-top-ten \
+            --exclude="app/api/routes_vulnerable.py" \
+            --no-git-ignore . || true
