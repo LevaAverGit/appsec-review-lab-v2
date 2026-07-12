@@ -41,6 +41,13 @@ _PATTERNS: list[tuple[str, re.Pattern, str, str, str]] = [
         "CWE-798",
     ),
     (
+        "WEAK_PASSWORD_HASH",
+        re.compile(r'hashlib\.(md5|sha1)\s*\(', re.IGNORECASE),
+        "MD5/SHA1 used for hashing — unsuitable for passwords (fast, unsalted)",
+        "high",
+        "CWE-916",
+    ),
+    (
         "SSRF_UNCHECKED_REQUEST",
         re.compile(r'httpx\.(get|post|put|delete|request)\s*\(\s*(?:url|target)', re.IGNORECASE),
         "httpx request with variable URL — verify SSRF guard is applied",

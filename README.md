@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/LevaAverGit/appsec-review-lab-v2/actions/workflows/ci.yml/badge.svg)](https://github.com/LevaAverGit/appsec-review-lab-v2/actions/workflows/ci.yml)
 
-A controlled lab demonstrating 7 common web vulnerabilities with secure counterparts, SAST/DAST checks, and structured reporting.
+A controlled lab demonstrating 8 common web vulnerabilities with secure counterparts, SAST/DAST checks, and structured reporting.
 
 Built to demonstrate AppSec awareness, secure coding, and Python backend skills at a junior/junior+ level. Not a production security tool.
 

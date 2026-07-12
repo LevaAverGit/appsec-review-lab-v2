@@ -3,6 +3,7 @@ Intentionally vulnerable endpoints for controlled lab demonstration.
 These patterns represent common AppSec mistakes.
 DO NOT deploy outside of an isolated lab environment.
 """
+import hashlib
 import html
 import os
 import sqlite3
@@ -220,3 +221,28 @@ def vulnerable_debug(request: Request):
         "upload_dir": settings.upload_dir,
         "python_path": os.sys.executable,
     }
+
+
+# ── 8. Cryptographic Failures (A02) ──────────────────────────────────────────
+
+@router.post("/register")
+def vulnerable_register(body: LoginRequest, request: Request):
+    """Cryptographic Failures: password stored with unsalted MD5.
+
+    VULNERABILITY: MD5 is fast and unsalted, so the digest falls to rainbow-table
+    and brute-force attacks in seconds. The stored hash is also echoed back,
+    leaking the (weak) credential material.
+    """
+    conn = _get_db(request)
+    # VULNERABILITY: MD5 is unsuitable for password storage (fast, unsalted, broken)
+    weak_hash = hashlib.md5(body.password.encode()).hexdigest()
+    try:
+        conn.execute(
+            "INSERT INTO users (username, password_hash) VALUES (?, ?)",
+            (body.username, weak_hash),
+        )
+        conn.commit()
+    except sqlite3.IntegrityError:
+        raise HTTPException(status_code=409, detail="Username already exists")
+    # VULNERABILITY: leaking the stored digest back to the client
+    return {"username": body.username, "algorithm": "md5", "password_hash": weak_hash}

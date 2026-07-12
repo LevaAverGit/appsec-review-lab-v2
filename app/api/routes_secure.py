@@ -228,3 +228,27 @@ async def secure_upload(file: UploadFile, request: Request):
 def secure_debug():
     """Debug endpoint disabled — returns 404 in any deployment."""
     raise HTTPException(status_code=404, detail="Not found")
+
+
+# ── 8. Cryptographic Failures (secure) ───────────────────────────────────────
+
+@router.post("/register")
+def secure_register(body: LoginRequest, request: Request):
+    """Password stored with bcrypt — salted, slow, and adaptive.
+
+    bcrypt embeds a per-password salt and a tunable work factor, so identical
+    passwords produce different digests and offline cracking is expensive. The
+    hash is never returned to the client.
+    """
+    conn = _get_db(request)
+    strong_hash = _pwd_ctx.hash(body.password)
+    try:
+        conn.execute(
+            "INSERT INTO users (username, password_hash) VALUES (?, ?)",
+            (body.username, strong_hash),
+        )
+        conn.commit()
+    except sqlite3.IntegrityError:
+        raise HTTPException(status_code=409, detail="Username already exists")
+    # Only a non-sensitive confirmation is returned — never the hash
+    return {"username": body.username, "algorithm": "bcrypt"}

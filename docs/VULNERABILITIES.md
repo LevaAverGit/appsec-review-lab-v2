@@ -78,3 +78,14 @@ Each vulnerability has a vulnerable endpoint, a secure counterpart, OWASP catego
 - **CWE:** CWE-200
 - **Root cause:** Debug endpoint returns `os.environ`, JWT secret, DB path.
 - **Fix:** Endpoint returns HTTP 404 unconditionally.
+
+---
+
+## 8. Cryptographic Failures
+
+- **Vulnerable:** `POST /vulnerable/register`
+- **Secure:** `POST /secure/register`
+- **OWASP:** A02:2021 – Cryptographic Failures
+- **CWE:** CWE-916 (Use of Password Hash With Insufficient Computational Effort), CWE-327
+- **Root cause:** Passwords hashed with unsalted MD5; the digest is echoed back to the client.
+- **Fix:** bcrypt with a per-password salt and tunable work factor; the hash is never returned.
