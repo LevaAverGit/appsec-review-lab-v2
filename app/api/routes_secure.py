@@ -252,3 +252,36 @@ def secure_register(body: LoginRequest, request: Request):
         raise HTTPException(status_code=409, detail="Username already exists")
     # Only a non-sensitive confirmation is returned — never the hash
     return {"username": body.username, "algorithm": "bcrypt"}
+
+
+# ── 9. Broken Function Level Authorization / BFLA (secure) ────────────────────
+
+_ADMIN_USERNAMES = {"alice"}
+
+
+@router.get("/admin/users")
+def secure_admin_users(request: Request):
+    """Function-level authorization enforced: only admins may list users."""
+    user = _require_auth(request)
+    if user.get("username") not in _ADMIN_USERNAMES:
+        raise HTTPException(status_code=403, detail="Admin privilege required")
+    conn = _get_db(request)
+    rows = conn.execute("SELECT id, username FROM users").fetchall()
+    return [dict(r) for r in rows]
+
+
+# ── 10. Mass Assignment / BOPLA (secure) ─────────────────────────────────────
+
+_PROFILE_ALLOWED_FIELDS = {"display_name"}
+
+
+@router.post("/profile")
+async def secure_update_profile(request: Request):
+    """Only whitelisted fields are bound; privileged fields are ignored."""
+    incoming = await request.json()
+    profile = {"username": incoming.get("username", "guest"), "role": "user", "display_name": ""}
+    # Bind only an explicit allow-list — 'role' and other server fields are ignored
+    for key in _PROFILE_ALLOWED_FIELDS:
+        if key in incoming:
+            profile[key] = incoming[key]
+    return profile

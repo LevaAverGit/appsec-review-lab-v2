@@ -89,3 +89,25 @@ Each vulnerability has a vulnerable endpoint, a secure counterpart, OWASP catego
 - **CWE:** CWE-916 (Use of Password Hash With Insufficient Computational Effort), CWE-327
 - **Root cause:** Passwords hashed with unsalted MD5; the digest is echoed back to the client.
 - **Fix:** bcrypt with a per-password salt and tunable work factor; the hash is never returned.
+
+---
+
+## 9. Broken Function Level Authorization (BFLA)
+
+- **Vulnerable:** `GET /vulnerable/admin/users`
+- **Secure:** `GET /secure/admin/users`
+- **OWASP:** A01:2021 – Broken Access Control · API5:2023 – BFLA
+- **CWE:** CWE-285 (Improper Authorization)
+- **Root cause:** Admin-only listing exposed with no authorization check; any caller can enumerate users.
+- **Fix:** Require an authenticated admin (function-level authorization) before returning data.
+
+---
+
+## 10. Mass Assignment
+
+- **Vulnerable:** `POST /vulnerable/profile`
+- **Secure:** `POST /secure/profile`
+- **OWASP:** A08:2021 – Software/Data Integrity · API3:2023 – BOPLA
+- **CWE:** CWE-915 (Improperly Controlled Modification of Object Attributes)
+- **Root cause:** Every client-supplied field is merged into the object, letting a caller set `role: admin`.
+- **Fix:** Bind only an explicit field whitelist (`display_name`); ignore privileged fields.

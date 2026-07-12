@@ -246,3 +246,33 @@ def vulnerable_register(body: LoginRequest, request: Request):
         raise HTTPException(status_code=409, detail="Username already exists")
     # VULNERABILITY: leaking the stored digest back to the client
     return {"username": body.username, "algorithm": "md5", "password_hash": weak_hash}
+
+
+# ── 9. Broken Function Level Authorization / BFLA (API5:2023) ─────────────────
+
+@router.get("/admin/users")
+def vulnerable_admin_users(request: Request):
+    """BFLA: an admin-only listing exposed with no authorization check.
+
+    VULNERABILITY: any caller — authenticated or not — can enumerate every user,
+    because the endpoint performs no function-level authorization.
+    """
+    conn = _get_db(request)
+    rows = conn.execute("SELECT id, username FROM users").fetchall()
+    return [dict(r) for r in rows]
+
+
+# ── 10. Mass Assignment / BOPLA (API3:2023) ──────────────────────────────────
+
+@router.post("/profile")
+async def vulnerable_update_profile(request: Request):
+    """Mass assignment: every client-supplied key is merged into the object.
+
+    VULNERABILITY: the client can set privileged fields such as ``role`` that the
+    server never intended to accept, escalating a normal user to admin.
+    """
+    incoming = await request.json()
+    profile = {"username": incoming.get("username", "guest"), "role": "user", "display_name": ""}
+    # VULNERABILITY: blind merge of all client keys, including 'role'
+    profile.update(incoming)
+    return profile

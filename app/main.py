@@ -23,8 +23,9 @@ def create_app(db_path: str | None = None) -> FastAPI:
     app = FastAPI(
         title="AppSec Review Lab",
         description=(
-            "Controlled lab demonstrating 7 common web vulnerabilities with "
-            "secure counterparts. Not a production application."
+            "Controlled lab demonstrating 8 common web vulnerabilities with "
+            "secure counterparts, mapped to the OWASP Top 10 and OWASP API "
+            "Security Top 10. Not a production application."
         ),
         version="0.1.0",
         lifespan=lifespan,
