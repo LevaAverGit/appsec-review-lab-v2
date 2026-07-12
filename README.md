@@ -6,6 +6,8 @@ A controlled lab demonstrating 8 common web vulnerabilities with secure counterp
 
 Built to demonstrate AppSec awareness, secure coding, and Python backend skills at a junior/junior+ level. Not a production security tool.
 
+**Quick look:** `python scripts/demo.py` runs every vulnerable/secure pair side by side — see the captured output in [docs/DEMO.md](docs/DEMO.md).
+
 ---
 
 ## What This Project Demonstrates
