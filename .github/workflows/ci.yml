@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -19,19 +23,49 @@ jobs:
       - name: Run tests
         run: pytest -v --tb=short
       - name: Lint (non-blocking)
-        run: ruff check app tests || true
-      - name: Install advisory security tools
-        run: pip install bandit semgrep
-      - name: Bandit SAST scan (advisory — intentionally vulnerable code)
         run: |
-          echo "NOTE: Bandit findings are expected — this repo intentionally contains"
-          echo "vulnerable code examples in app/api/routes_vulnerable.py for educational purposes."
-          bandit -r app -ll --exclude app/api/routes_vulnerable.py || true
-          echo "--- Informational scan of vulnerable routes (expected findings) ---"
-          bandit -r app/api/routes_vulnerable.py -ll || true
-      - name: Semgrep advisory scan (advisory — intentionally vulnerable code)
+          pip install ruff
+          ruff check app tests || true
+
+  security:
+    # Findings are surfaced in the GitHub Security tab (SARIF), not used to fail
+    # the build: this repo intentionally contains vulnerable code in
+    # app/api/routes_vulnerable.py, so scanner findings there are expected.
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install security tools
+        run: pip install "bandit[sarif]" semgrep pip-audit
+
+      - name: Bandit SAST (SARIF)
+        run: bandit -r app -f sarif -o bandit.sarif || true
+      - name: Upload Bandit SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: bandit.sarif
+          category: bandit
+        continue-on-error: true
+
+      - name: Semgrep SAST (SARIF)
         run: |
-          echo "NOTE: Semgrep findings in routes_vulnerable.py are expected by design."
           semgrep --config p/python --config p/owasp-top-ten \
-            --exclude="app/api/routes_vulnerable.py" \
-            --no-git-ignore . || true
+            --sarif --output semgrep.sarif || true
+      - name: Upload Semgrep SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep
+        continue-on-error: true
+
+      - name: Dependency audit (pip-audit, advisory)
+        run: pip-audit -r requirements.txt || true
+
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
