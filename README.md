@@ -1,6 +1,6 @@
 # AppSec Review Lab
 
-[![CI](https://github.com/LevaAverGit/appsec-review-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/LevaAverGit/appsec-review-lab/actions/workflows/ci.yml)
+[![CI](https://github.com/LevaAverGit/appsec-review-lab-v2/actions/workflows/ci.yml/badge.svg)](https://github.com/LevaAverGit/appsec-review-lab-v2/actions/workflows/ci.yml)
 
 A controlled lab demonstrating 7 common web vulnerabilities with secure counterparts, SAST/DAST checks, and structured reporting.
 
