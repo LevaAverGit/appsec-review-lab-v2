@@ -82,6 +82,13 @@ _PATTERNS: list[tuple[str, re.Pattern, str, str, str]] = [
         "medium",
         "CWE-200",
     ),
+    (
+        "INSECURE_DESERIALIZATION",
+        re.compile(r'(pickle\.loads?|marshal\.loads?|yaml\.load)\s*\(', re.IGNORECASE),
+        "Unsafe deserialization (pickle/marshal/yaml.load) — use safe alternatives (yaml.safe_load, json)",
+        "high",
+        "CWE-502",
+    ),
 ]
 
 
