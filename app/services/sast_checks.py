@@ -89,6 +89,20 @@ _PATTERNS: list[tuple[str, re.Pattern, str, str, str]] = [
         "high",
         "CWE-502",
     ),
+    (
+        "OS_COMMAND_INJECTION",
+        re.compile(r'(os\.system\s*\(|os\.popen\s*\(|subprocess\.\w+\([^)]*shell\s*=\s*True)', re.IGNORECASE),
+        "os.system/os.popen or subprocess with shell=True — potential OS command injection if input is user-controlled",
+        "critical",
+        "CWE-78",
+    ),
+    (
+        "DISABLED_TLS_VERIFICATION",
+        re.compile(r'\bverify\s*=\s*False\b', re.IGNORECASE),
+        "TLS certificate verification disabled (verify=False) — enables man-in-the-middle attacks",
+        "high",
+        "CWE-295",
+    ),
 ]
 
 

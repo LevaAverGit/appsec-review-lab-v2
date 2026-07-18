@@ -44,6 +44,27 @@ class TestSASTFileScanning:
         findings = scan_file(p)
         assert any(f.pattern == "XSS_RAW_HTML" for f in findings)
 
+    def test_os_command_injection_system_flagged(self):
+        p = _write_temp('os.system("ping -c 1 " + user_host)')
+        findings = scan_file(p)
+        assert any(f.pattern == "OS_COMMAND_INJECTION" for f in findings)
+
+    def test_subprocess_shell_true_flagged(self):
+        p = _write_temp('subprocess.run(user_cmd, shell=True)')
+        findings = scan_file(p)
+        assert any(f.pattern == "OS_COMMAND_INJECTION" for f in findings)
+
+    def test_disabled_tls_verification_flagged(self):
+        p = _write_temp('resp = requests.get(url, verify=False)')
+        findings = scan_file(p)
+        assert any(f.pattern == "DISABLED_TLS_VERIFICATION" for f in findings)
+
+    def test_verify_exp_not_flagged_as_tls(self):
+        # JWT verify_exp=False must not be misread as disabled TLS verification
+        p = _write_temp('options = {"verify_exp": False}')
+        findings = scan_file(p)
+        assert not any(f.pattern == "DISABLED_TLS_VERIFICATION" for f in findings)
+
     def test_comment_line_skipped(self):
         p = _write_temp('# rendered = f"<p>{content}</p>"')
         findings = scan_file(p)
