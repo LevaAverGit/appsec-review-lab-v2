@@ -18,7 +18,7 @@ Built to demonstrate AppSec awareness, secure coding, and Python backend skills 
 - **DAST checks** — in-process payload tests that probe running endpoints with attack payloads
 - **Structured reporting** — Markdown and JSON AppSec reports with findings model (Finding, AppSecReport)
 - **FastAPI backend** — Pydantic v2 models, JWT auth, multipart file upload, parameterized queries
-- **159 tests, 0 failures** — TestClient, tmp_path DB isolation, no mocks
+- **180 tests, 0 failures** — TestClient, tmp_path DB isolation, no mocks
 - **15 docs** — PRD, threat model, secure code review, remediation guide, interview notes, and more
 
 ---
@@ -34,6 +34,30 @@ Built to demonstrate AppSec awareness, secure coding, and Python backend skills 
 | 5 | Stored XSS | A03:2021 | CWE-79 | `POST /vulnerable/comments` | `POST /secure/comments` |
 | 6 | Insecure Upload | A05:2021 | CWE-434/22 | `POST /vulnerable/upload` | `POST /secure/upload` |
 | 7 | Security Misconfig | A05:2021 | CWE-200 | `GET /vulnerable/debug` | `GET /secure/debug` |
+
+---
+
+## SAST Pattern Coverage
+
+The heuristic scanner (`app/services/sast_checks.py`) flags the following dangerous
+Python coding patterns, each mapped to a CWE:
+
+| Pattern | CWE | Severity |
+|---|---|---|
+| `SQL_INJECTION_FSTRING` / `SQL_INJECTION_FORMAT` | CWE-89 | high |
+| `HARDCODED_SECRET` | CWE-798 | high |
+| `WEAK_PASSWORD_HASH` (MD5/SHA1) | CWE-916 | high |
+| `SSRF_UNCHECKED_REQUEST` | CWE-918 | medium |
+| `XSS_RAW_HTML` | CWE-79 | high |
+| `PATH_TRAVERSAL` | CWE-22 | high |
+| `JWT_WEAK_OPTIONS` (verify_exp disabled) | CWE-347 | critical |
+| `DEBUG_ENDPOINT_ENV_DUMP` | CWE-200 | medium |
+| `INSECURE_DESERIALIZATION` (pickle/marshal/yaml.load) | CWE-502 | high |
+| `OS_COMMAND_INJECTION` (os.system/os.popen/shell=True) | CWE-78 | critical |
+| `DISABLED_TLS_VERIFICATION` (verify=False) | CWE-295 | high |
+
+Command injection and disabled TLS verification are walked through in
+[docs/COMMAND_INJECTION_REVIEW.md](docs/COMMAND_INJECTION_REVIEW.md).
 
 ---
 
@@ -108,7 +132,7 @@ Sample reports: `reports/sample_findings.json`, `reports/sample_appsec_report.md
 ## Tests
 
 ```bash
-make test  # 159 tests
+make test  # 180 tests
 ```
 
 | Module | Coverage |
@@ -145,7 +169,7 @@ appsec-review-lab/
 │       ├── sast_checks.py
 │       ├── dast_checks.py
 │       └── report_service.py
-├── tests/                     159 tests
+├── tests/                     180 tests
 ├── docs/                      16 documentation files
 ├── reports/
 │   ├── sample_appsec_report.md

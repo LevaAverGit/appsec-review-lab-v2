@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here.
 
+## [0.3.0]
+
+### Added
+- OS command injection SAST rule for `os.system` / `os.popen` and `subprocess` calls with `shell=True` (CWE-78).
+- Disabled-TLS-verification SAST rule for HTTP client calls with `verify=False` (CWE-295).
+- Secure code review write-up for OS command injection and disabled TLS verification (`docs/COMMAND_INJECTION_REVIEW.md`).
+- SAST pattern coverage table in the README mapping every rule to its CWE and severity.
+
 ## [0.2.0]
 
 ### Added
