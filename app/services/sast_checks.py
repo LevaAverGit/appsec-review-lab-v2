@@ -103,6 +103,16 @@ _PATTERNS: list[tuple[str, re.Pattern, str, str, str]] = [
         "high",
         "CWE-295",
     ),
+    (
+        "INSECURE_RANDOM_TOKEN",
+        re.compile(
+            r'(token|secret|session_id|otp|reset_code|verification_code)\s*=.*\brandom\.(random|randint|randrange|choice|uniform)\s*\(',
+            re.IGNORECASE,
+        ),
+        "random module used to generate a token/secret — not cryptographically secure, use the secrets module instead",
+        "high",
+        "CWE-330",
+    ),
 ]
 
 

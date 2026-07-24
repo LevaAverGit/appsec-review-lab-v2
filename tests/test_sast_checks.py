@@ -65,6 +65,26 @@ class TestSASTFileScanning:
         findings = scan_file(p)
         assert not any(f.pattern == "DISABLED_TLS_VERIFICATION" for f in findings)
 
+    def test_insecure_random_token_flagged(self):
+        p = _write_temp('otp = str(random.randint(100000, 999999))')
+        findings = scan_file(p)
+        assert any(f.pattern == "INSECURE_RANDOM_TOKEN" for f in findings)
+
+    def test_insecure_random_session_id_flagged(self):
+        p = _write_temp("session_id = random.choice(string.ascii_letters)")
+        findings = scan_file(p)
+        assert any(f.pattern == "INSECURE_RANDOM_TOKEN" for f in findings)
+
+    def test_secrets_module_not_flagged_as_insecure_random(self):
+        p = _write_temp('token = secrets.token_hex(16)')
+        findings = scan_file(p)
+        assert not any(f.pattern == "INSECURE_RANDOM_TOKEN" for f in findings)
+
+    def test_unrelated_random_usage_not_flagged(self):
+        p = _write_temp('index = random.randint(0, len(items))')
+        findings = scan_file(p)
+        assert not any(f.pattern == "INSECURE_RANDOM_TOKEN" for f in findings)
+
     def test_comment_line_skipped(self):
         p = _write_temp('# rendered = f"<p>{content}</p>"')
         findings = scan_file(p)

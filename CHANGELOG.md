@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here.
 
+## [0.3.1]
+
+### Added
+- Insecure-random-token SAST rule for tokens/secrets generated with the `random` module instead of `secrets` (CWE-330).
+
 ## [0.3.0]
 
 ### Added

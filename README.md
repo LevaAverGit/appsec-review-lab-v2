@@ -18,7 +18,7 @@ Built to demonstrate AppSec awareness, secure coding, and Python backend skills 
 - **DAST checks** — in-process payload tests that probe running endpoints with attack payloads
 - **Structured reporting** — Markdown and JSON AppSec reports with findings model (Finding, AppSecReport)
 - **FastAPI backend** — Pydantic v2 models, JWT auth, multipart file upload, parameterized queries
-- **180 tests, 0 failures** — TestClient, tmp_path DB isolation, no mocks
+- **184 tests, 0 failures** — TestClient, tmp_path DB isolation, no mocks
 - **15 docs** — PRD, threat model, secure code review, remediation guide, interview notes, and more
 
 ---
@@ -55,6 +55,7 @@ Python coding patterns, each mapped to a CWE:
 | `INSECURE_DESERIALIZATION` (pickle/marshal/yaml.load) | CWE-502 | high |
 | `OS_COMMAND_INJECTION` (os.system/os.popen/shell=True) | CWE-78 | critical |
 | `DISABLED_TLS_VERIFICATION` (verify=False) | CWE-295 | high |
+| `INSECURE_RANDOM_TOKEN` (random module for tokens/secrets) | CWE-330 | high |
 
 Command injection and disabled TLS verification are walked through in
 [docs/COMMAND_INJECTION_REVIEW.md](docs/COMMAND_INJECTION_REVIEW.md).
@@ -132,7 +133,7 @@ Sample reports: `reports/sample_findings.json`, `reports/sample_appsec_report.md
 ## Tests
 
 ```bash
-make test  # 180 tests
+make test  # 184 tests
 ```
 
 | Module | Coverage |
@@ -169,7 +170,7 @@ appsec-review-lab/
 │       ├── sast_checks.py
 │       ├── dast_checks.py
 │       └── report_service.py
-├── tests/                     180 tests
+├── tests/                     184 tests
 ├── docs/                      16 documentation files
 ├── reports/
 │   ├── sample_appsec_report.md
