@@ -129,6 +129,18 @@ class TestSASTFileScanning:
         findings = scan_directory(tmp_path)
         assert len(findings) == 0
 
+    def test_scan_directory_skips_dependency_dirs(self, tmp_path: Path):
+        # A hardcoded secret inside .venv must NOT be reported (third-party noise),
+        # while the same pattern in project source must be reported.
+        venv = tmp_path / ".venv" / "lib"
+        venv.mkdir(parents=True)
+        (venv / "dep.py").write_text('secret = "leaked_dependency_value"')
+        (tmp_path / "app.py").write_text('secret = "leaked_app_value"')
+        findings = scan_directory(tmp_path)
+        files = {f.file for f in findings}
+        assert any("app.py" in f for f in files)
+        assert not any(".venv" in f for f in files)
+
     def test_vulnerable_routes_have_findings(self):
         routes = Path(__file__).parents[1] / "app" / "api" / "routes_vulnerable.py"
         findings = scan_file(routes)

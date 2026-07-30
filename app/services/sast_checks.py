@@ -143,8 +143,18 @@ def scan_file(path: Path) -> list[SASTFinding]:
     return findings
 
 
+# Directories that hold dependencies, caches or VCS data rather than the
+# project's own source — scanning them produces noisy findings in third-party code.
+_EXCLUDED_DIRS = frozenset({
+    ".venv", "venv", "env", "__pycache__", ".git", ".pytest_cache",
+    ".mypy_cache", "node_modules", "build", "dist", ".tox", "site-packages",
+})
+
+
 def scan_directory(root: Path, glob: str = "**/*.py") -> list[SASTFinding]:
     findings: list[SASTFinding] = []
     for path in sorted(root.glob(glob)):
+        if any(part in _EXCLUDED_DIRS for part in path.parts):
+            continue
         findings.extend(scan_file(path))
     return findings
